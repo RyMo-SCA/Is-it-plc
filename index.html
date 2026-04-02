@@ -34,23 +34,92 @@
     </div>
 
     <script>
-        // Data storage object
-       let userData = { name: "", startTime: "", score: 0, answers: [] };
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtgoreHCHdvsSVtYdQH_n7KCr4GY50UAnQCLV0KN3BhmVm6c3KLhgEY5EYCUKaErztbg/exec"; // Put your URL from Step 1 here
+// 1. Data storage object
+let userData = { 
+    name: "", 
+    startTime: "", 
+    score: 0, 
+    answers: [],
+    secret: "MY_QUIZ_2026" // Matches the "Lockbox" logic if you added it to the script
+};
+
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtgoreHCHdvsSVtYdQH_n7KCr4GY50UAnQCLV0KN3BhmVm6c3KLhgEY5EYCUKaErztbg/exec";
+
+// 2. The Quiz Content
+const questions = [
+    { q: "Are your profit margins currently peaking?", stage: "Maturity" },
+    { q: "Is your main goal currently building awareness?", stage: "Introduction" }
+];
+let currentQuestionIndex = 0;
+
+// 3. Start the Quiz & Log User Info
+async function startQuiz() {
+    const nameInput = document.getElementById('user-name').value;
+    
+    if (nameInput.trim() === "") {
+        alert("Please enter a name!");
+        return;
+    }
+
+    userData.name = nameInput;
+    userData.startTime = new Date().toLocaleString();
+
+    // UI Transition
+    document.getElementById('welcome-screen').classList.add('hidden');
+    document.getElementById('quiz-area').classList.remove('hidden');
+    document.getElementById('user-display').innerText = `Vibing as: ${userData.name}`;
+    
+    loadQuestion();
+}
+
+function loadQuestion() {
+    if (currentQuestionIndex < questions.length) {
+        const q = questions[currentQuestionIndex];
+        document.getElementById('question').innerText = q.q;
+    } else {
+        showResults();
+    }
+}
+
+function handleAnswer(choice) {
+    userData.answers.push({
+        question: questions[currentQuestionIndex].q,
+        answer: choice
+    });
+    
+    currentQuestionIndex++;
+    loadQuestion();
+}
+
+// 4. Final Submission
+async function showResults() {
+    document.getElementById('quiz-area').innerHTML = `
+        <div class="text-center">
+            <h2 class="text-2xl font-bold mb-4">Quiz Complete!</h2>
+            <p class="mb-6 text-slate-400">Saving your results to the sheet...</p>
+            <div class="animate-spin h-8 w-8 border-4 border-cyan-500 border-t-transparent rounded-full mx-auto"></div>
+        </div>
+    `;
+
+    await submitResults();
+    
+    document.getElementById('quiz-area').innerHTML = `
+        <div class="text-center">
+            <h2 class="text-2xl font-bold mb-4 text-green-400">All Set!</h2>
+            <p>Your data has been logged to the Google Sheet.</p>
+        </div>
+    `;
+}
 
 async function submitResults() {
-    // Show a "Saving..." vibe
-    console.log("Sending data to Google Sheets...");
-    
+    console.log("Sending data:", userData);
     try {
         await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors', // Critical for Google Scripts
-            cache: 'no-cache',
+            mode: 'no-cors', 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userData)
         });
-        alert("Results saved to the cloud!");
     } catch (error) {
         console.error("Error saving data:", error);
     }
