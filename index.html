@@ -9,28 +9,81 @@
 <body class="bg-slate-900 text-white font-sans flex items-center justify-center min-h-screen">
 
     <div id="quiz-container" class="max-w-md w-full p-8 bg-slate-800 rounded-2xl shadow-2xl">
-        <h1 class="text-2xl font-bold mb-4 text-cyan-400">PLC Quiz Builder</h1>
-        <div id="question-area">
-            <p class="text-lg mb-6" id="question">Loading your first vibe...</p>
+        
+        <div id="welcome-screen" class="text-center">
+            <h1 class="text-3xl font-bold mb-2 text-cyan-400">PLC Quiz</h1>
+            <p class="text-slate-400 mb-6">Determine the stage of your product.</p>
+            
+            <input type="text" id="user-name" placeholder="Enter your name" 
+                class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white">
+            
+            <button onclick="startQuiz()" 
+                class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                Enter Quiz
+            </button>
+        </div>
+
+        <div id="quiz-area" class="hidden">
+            <h2 class="text-sm uppercase tracking-widest text-slate-500 mb-2" id="user-display"></h2>
+            <p class="text-lg mb-6" id="question">Loading question...</p>
             <div id="options" class="space-y-3">
-                </div>
+                <button onclick="handleAnswer('Yes')" class="w-full text-left p-3 rounded bg-slate-700 hover:bg-slate-600 transition">Yes</button>
+                <button onclick="handleAnswer('No')" class="w-full text-left p-3 rounded bg-slate-700 hover:bg-slate-600 transition mt-2">No</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // This is where your 'Vibe' logic lives
+        // Data storage object
+        let userData = {
+            name: "",
+            startTime: "",
+            answers: []
+        };
+
         const questions = [
             { q: "Are your profit margins currently peaking?", stage: "Maturity" },
-            { q: "Is your main goal currently just 'surviving' and building awareness?", stage: "Introduction" }
+            { q: "Is your main goal currently building awareness?", stage: "Introduction" }
         ];
+
+        function startQuiz() {
+            const nameInput = document.getElementById('user-name').value;
+            
+            if (nameInput.trim() === "") {
+                alert("Please enter a name to vibe with us!");
+                return;
+            }
+
+            // Capture data and time
+            userData.name = nameInput;
+            userData.startTime = new Date().toLocaleString(); // e.g., "4/2/2026, 8:44 PM"
+
+            console.log("Session Started:", userData);
+
+            // UI Transition
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('quiz-area').classList.remove('hidden');
+            document.getElementById('user-display').innerText = `Vibing as: ${userData.name}`;
+            
+            loadQuestion();
+        }
 
         function loadQuestion() {
             const q = questions[0];
             document.getElementById('question').innerText = q.q;
-            // More logic goes here as you build!
         }
-        
-        loadQuestion();
+
+        function handleAnswer(choice) {
+            // Store answer data
+            userData.answers.push({
+                question: questions[0].q,
+                answer: choice,
+                timestamp: new Date().toLocaleString()
+            });
+
+            alert(`Nice one, ${userData.name}! We've logged that. Check your browser console to see the data object.`);
+            console.log("Current Data Collected:", userData);
+        }
     </script>
 </body>
 </html>
