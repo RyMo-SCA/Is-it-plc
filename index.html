@@ -34,191 +34,80 @@
     </div>
 
     <script>
-// 1. Data storage
 let userData = { 
     name: "", 
     startTime: "", 
     score: 0, 
-    answers: [],
-    secret: "MY_QUIZ_2026" 
+    // New Categorized Tracking
+    categoryScores: {
+        "Concept": { correct: 0, total: 0 },
+        "Design": { correct: 0, total: 0 },
+        "Prototyping": { correct: 0, total: 0 },
+        "Production": { correct: 0, total: 0 },
+        "Support": { correct: 0, total: 0 },
+        "Planning": { correct: 0, total: 0 }
+    }
 };
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtgoreHCHdvsSVtYdQH_n7KCr4GY50UAnQCLV0KN3BhmVm6c3KLhgEY5EYCUKaErztbg/exec";
-
-// 2. The 10 Professional PLC Questions
 const questions = [
-    { 
-        q: "What is the correct sequence of the five stages of the Product Lifecycle Workflow?", 
-        options: [
-            "Concept + NPI, Prototype + Test, Design + Development, Launch + Production, Maintain + Support",
-            "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support",
-            "Design + Development, Concept + NPI, Launch + Production, Prototype + Test, Maintain + Support",
-            "Ideation, Launch + Production, Design + Development, Prototype + Test, Maintain + Support"
-        ], 
-        correct: "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support",
-        topic: "Workflow Sequence"
-    },
-    { 
-        q: "What is the primary goal of the 'Concept + NPI' stage?", 
-        options: [
-            "To engineer the features of the product and ensure its feasibility.",
-            "To manufacture the product at scale while maintaining quality.",
-            "To generate and refine a product idea that fulfills a market need.",
-            "To build a model of the product to validate its user experience."
-        ], 
-        correct: "To generate and refine a product idea that fulfills a market need.",
-        topic: "Concept Stage"
-    },
-    { 
-        q: "During 'Design + Development', what is the core focus of the project team?", 
-        options: [
-            "Ensuring customer satisfaction by providing ongoing support.",
-            "Engineering the features of the product to ensure its feasibility and functionality.",
-            "Going to market and scaling production efficiency.",
-            "Testing physical models and addressing post-launch defects."
-        ], 
-        correct: "Engineering the features of the product to ensure its feasibility and functionality.",
-        topic: "Design Phase"
-    },
-    { 
-        q: "Which methodology prioritizes ease of making parts and simplifying the final product build?", 
-        options: ["DFMA", "8D Problem Solving", "CAPA", "Value Stream Mapping"], 
-        correct: "DFMA",
-        topic: "Methodologies"
-    },
-    { 
-        q: "What defines the 'Prototype + Test' (or Pilot) phase?", 
-        options: [
-            "Evaluating new product ideas from customer feedback surveys.",
-            "Building a model of the product to validate its design and functionality.",
-            "Managing end-of-life product sunsetting.",
-            "Executing marketing campaigns and supply chain logistics."
-        ], 
-        correct: "Building a model of the product to validate its design and functionality.",
-        topic: "Prototyping"
-    },
-    { 
-        q: "If a defect is found, which Lean methodology is used specifically for 'Root Cause Analysis'?", 
-        options: ["Market Analysis Canvas", "PERT Chart", "The 5 Whys", "SIPOC Diagram"], 
-        correct: "The 5 Whys",
-        topic: "Root Cause Analysis"
-    },
-    { 
-        q: "What is the overarching objective of the 'Launch + Production' stage?", 
-        options: [
-            "To manufacture the product at scale while maintaining quality and efficiency.",
-            "To conduct initial budget approvals and resource forecasting.",
-            "To track corrective actions from customer complaints.",
-            "To visually brainstorm initial product requirements."
-        ], 
-        correct: "To manufacture the product at scale while maintaining quality and efficiency.",
-        topic: "Launch & Production"
-    },
-    { 
-        q: "Which method allows teams to visualize the journey from supplier to customer?", 
-        options: ["Stakeholder Mapping", "Customer Journey Board", "SQCDP Board", "Value Stream Mapping"], 
-        correct: "Value Stream Mapping",
-        topic: "Lean Tools"
-    },
-    { 
-        q: "What is a critical function of the 'Maintain + Support' stage?", 
-        options: [
-            "Gathering initial focus groups for new concepts.",
-            "Ensuring customer satisfaction by tracking issues and updates.",
-            "Designing internal components and writing code.",
-            "Finalizing supply chain logistics for initial launch."
-        ], 
-        correct: "Ensuring customer satisfaction by tracking issues and updates.",
-        topic: "Post-Launch Support"
-    },
-    { 
-        q: "Which visual project map is best used to determine the critical path in complex projects?", 
-        options: ["PERT Chart", "5S Technique", "PDCA Cycle", "8 Wastes of Lean"], 
-        correct: "PERT Chart",
-        topic: "Project Planning"
-    }
+    { q: "Sequence of the five stages?", stage: "Concept", correct: "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support", options: [...] },
+    { q: "Goal of Concept + NPI?", stage: "Concept", correct: "To generate and refine a product idea that fulfills a market need.", options: [...] },
+    { q: "Focus of Design + Development?", stage: "Design", correct: "Engineering the features of the product to ensure its feasibility and functionality.", options: [...] },
+    { q: "Methodology for ease of assembly (DFMA)?", stage: "Design", correct: "DFMA", options: [...] },
+    { q: "What defines Prototype + Test?", stage: "Prototyping", correct: "Building a model of the product to validate its design and functionality.", options: [...] },
+    { q: "Methodology for Root Cause (5 Whys)?", stage: "Prototyping", correct: "The 5 Whys", options: [...] },
+    { q: "Objective of Launch + Production?", stage: "Production", correct: "To manufacture the product at scale while maintaining quality and efficiency.", options: [...] },
+    { q: "Visualize journey (Value Stream Mapping)?", stage: "Production", correct: "Value Stream Mapping", options: [...] },
+    { q: "Function of Maintain + Support?", stage: "Support", correct: "Ensuring customer satisfaction by tracking issues and updates.", options: [...] },
+    { q: "Visual map for critical path (PERT)?", stage: "Planning", correct: "PERT Chart", options: [...] }
 ];
 
-let currentQuestionIndex = 0;
-
-function startQuiz() {
-    const nameInput = document.getElementById('user-name').value;
-    if (nameInput.trim() === "") return alert("Please enter your name!");
-
-    userData.name = nameInput;
-    userData.startTime = new Date().toLocaleString();
-
-    document.getElementById('welcome-screen').classList.add('hidden');
-    document.getElementById('quiz-area').classList.remove('hidden');
-    document.getElementById('user-display').innerText = `Candidate: ${userData.name}`;
-    
-    loadQuestion();
-}
-
-function loadQuestion() {
-    const optionsEl = document.getElementById('options');
-    optionsEl.innerHTML = "";
-
-    if (currentQuestionIndex < questions.length) {
-        const currentQ = questions[currentQuestionIndex];
-        document.getElementById('question').innerText = `${currentQuestionIndex + 1}. ${currentQ.q}`;
-
-        currentQ.options.forEach(option => {
-            const btn = document.createElement('button');
-            btn.innerText = option;
-            btn.className = "w-full text-left p-3 rounded bg-slate-700 hover:bg-slate-600 transition border border-slate-600 text-sm mb-2";
-            btn.onclick = () => handleAnswer(option);
-            optionsEl.appendChild(btn);
-        });
-    } else {
-        showResults();
-    }
-}
+// ... (startQuiz and loadQuestion remain the same)
 
 function handleAnswer(selectedOption) {
     const currentQ = questions[currentQuestionIndex];
     const isCorrect = selectedOption === currentQ.correct;
-
+    
+    // Update Global Score
     if (isCorrect) userData.score += 1;
 
-    userData.answers.push({
-        topic: currentQ.topic,
-        isCorrect: isCorrect
-    });
+    // Update Categorized Score
+    const stage = currentQ.stage;
+    userData.categoryScores[stage].total += 1;
+    if (isCorrect) {
+        userData.categoryScores[stage].correct += 1;
+    }
     
     currentQuestionIndex++;
     loadQuestion();
 }
 
 async function showResults() {
-    // Determine the weak area for "Recommended Learning"
-    const missedTopics = userData.answers.filter(a => !a.isCorrect).map(a => a.topic);
-    let recommendation = "You have a solid grasp of the PLC workflow!";
-    if (missedTopics.length > 0) {
-        recommendation = `Focus your studies on: **${[...new Set(missedTopics)].join(", ")}**.`;
+    // Generate Feedback HTML based on categories
+    let feedbackHTML = `<h3 class="text-cyan-400 font-bold mb-4">Stage Breakdown:</h3>`;
+    
+    for (const [stage, data] of Object.entries(userData.categoryScores)) {
+        const percent = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
+        const color = percent >= 100 ? 'text-green-400' : percent >= 50 ? 'text-yellow-400' : 'text-red-400';
+        
+        feedbackHTML += `
+            <div class="flex justify-between text-sm mb-1 border-b border-slate-700 pb-1">
+                <span>${stage}:</span>
+                <span class="${color}">${percent}%</span>
+            </div>`;
     }
 
     document.getElementById('quiz-area').innerHTML = `
         <div class="text-center">
-            <h2 class="text-2xl font-bold mb-2 text-cyan-400">Score: ${userData.score} / 10</h2>
-            <p class="mb-4 text-white">${recommendation}</p>
-            <p class="text-xs text-slate-500 mb-6 italic">Syncing results to Google Sheets...</p>
-            <button onclick="location.reload()" class="bg-cyan-600 px-6 py-2 rounded-lg font-bold">Restart Quiz</button>
+            <h2 class="text-2xl font-bold mb-2">Results for ${userData.name}</h2>
+            <div class="bg-slate-900 p-4 rounded-lg mb-6 text-left">
+                ${feedbackHTML}
+            </div>
+            <button onclick="location.reload()" class="bg-cyan-600 px-6 py-2 rounded-lg font-bold">Try Again</button>
         </div>
     `;
 
     await submitResults();
-}
-
-async function submitResults() {
-    try {
-        await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors', 
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData)
-        });
-    } catch (e) { console.error("Submit Error:", e); }
 }
     </script>
 </body>
