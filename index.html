@@ -8,16 +8,28 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        
+        body { 
+            font-family: 'Inter', sans-serif;
+            background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2Vxc2NueWljcXN2N3V3eXIwMTRza2hvcXpvMGE2aTB1eGhqNmJ5MiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7AtHoQ9XWbpwLRxs0t/giphy.gif');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+        /* Custom scrollbar for a cleaner vibe */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.3); border-radius: 10px; }
     </style>
 </head>
-<body class="bg-[url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2Vxc2NueWljcXN2N3V3eXIwMTRza2hvcXpvMGE2aTB1eGhqNmJ5MiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7AtHoQ9XWbpwLRxs0t/giphy.gif')] 
-             bg-cover bg-center bg-fixed min-h-screen flex items-center justify-center p-4 text-white relative">
+<body class="min-h-screen flex items-center justify-center p-4 text-white relative">
 
     <div class="fixed inset-0 bg-slate-950/50 -z-10"></div>
 
     <div id="quiz-container" 
-         class="max-w-2xl w-full p-8 bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl relative z-10 transition-all duration-500">
+         class="max-w-2xl w-full p-8 bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl relative z-10 transition-all duration-500">
         
         <div id="welcome-screen" class="text-center">
             <h1 class="text-4xl font-extrabold mb-2 text-cyan-400 tracking-tight">PLC Assessment</h1>
@@ -27,7 +39,7 @@
                 class="w-full p-4 rounded-xl bg-slate-800/80 border border-slate-600 mb-6 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white placeholder-slate-500">
             
             <button onclick="startQuiz()" 
-                class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-4 px-6 rounded-xl transition duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-cyan-500/20">
+                class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-4 px-6 rounded-xl transition duration-300 transform hover:scale-[1.01] active:scale-95 shadow-lg shadow-cyan-500/20">
                 Begin Assessment
             </button>
         </div>
@@ -66,7 +78,7 @@
             }
         };
 
-        // REPLACE THIS WITH YOUR LATEST DEPLOYMENT URL
+        // Your Deployment URL
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtgoreHCHdvsSVtYdQH_n7KCr4GY50UAnQCLV0KN3BhmVm6c3KLhgEY5EYCUKaErztbg/exec";
 
         const questions = [
@@ -106,4 +118,85 @@
             optionsEl.innerHTML = "";
             q.options.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = "text-left p-4 rounded-xl bg-slate-800/50 hover:bg-cyan-600/20 border border-slate-700 hover:
+                btn.className = "text-left p-4 rounded-xl bg-slate-800/60 hover:bg-cyan-600/20 border border-slate-700 hover:border-cyan-500/50 transition-all text-sm leading-relaxed";
+                btn.innerText = opt;
+                btn.onclick = () => handleAnswer(opt);
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(answer) {
+            const q = questions[currentIndex];
+            const isCorrect = answer === q.correct;
+            
+            userData.categoryScores[q.cat].total++;
+            if (isCorrect) {
+                userData.categoryScores[q.cat].correct++;
+                userData.score++;
+            }
+            
+            currentIndex++;
+            loadQuestion();
+        }
+
+        async function showResults() {
+            document.getElementById('quiz-area').classList.add('hidden');
+            document.getElementById('results-area').classList.remove('hidden');
+            document.getElementById('final-score-text').innerText = `Total Accuracy: ${Math.round((userData.score / questions.length) * 100)}%`;
+            
+            renderChart();
+            await submitResults();
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            const labels = Object.keys(userData.categoryScores);
+            const scores = labels.map(label => {
+                const cat = userData.categoryScores[label];
+                return cat.total > 0 ? (cat.correct / cat.total) * 100 : 0;
+            });
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Proficiency',
+                        data: scores,
+                        backgroundColor: 'rgba(34, 211, 238, 0.2)',
+                        borderColor: '#22d3ee',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#22d3ee',
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { display: false },
+                            pointLabels: { color: '#94a3b8', font: { size: 11, weight: '600' } }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        async function submitResults() {
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(userData)
+                });
+            } catch (e) { console.log("Sync attempted."); }
+        }
+    </script>
+</body>
+</html>
