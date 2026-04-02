@@ -34,37 +34,46 @@
     </div>
 
     <script>
-// 1. Data storage object
+// 1. Data storage & Quiz Setup
 let userData = { 
     name: "", 
     startTime: "", 
     score: 0, 
     answers: [],
-    secret: "MY_QUIZ_2026" // Matches the "Lockbox" logic if you added it to the script
+    secret: "MY_QUIZ_2026" 
 };
 
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtgoreHCHdvsSVtYdQH_n7KCr4GY50UAnQCLV0KN3BhmVm6c3KLhgEY5EYCUKaErztbg/exec";
 
-// 2. The Quiz Content
+// 2. Your New Questions
 const questions = [
-    { q: "Are your profit margins currently peaking?", stage: "Maturity" },
-    { q: "Is your main goal currently building awareness?", stage: "Introduction" }
+    { 
+        q: "What colour is the Sun?", 
+        options: ["Red", "Green", "Yellow", "Blue"], 
+        correct: "Yellow" 
+    },
+    { 
+        q: "Do you know what product life cycle is?", 
+        options: ["Yes", "No"], 
+        correct: "Yes" 
+    },
+    { 
+        q: "How many legs does a dog have?", 
+        options: ["1", "2", "3", "4"], 
+        correct: "4" 
+    }
 ];
+
 let currentQuestionIndex = 0;
 
-// 3. Start the Quiz & Log User Info
-async function startQuiz() {
+// 3. Navigation Logic
+function startQuiz() {
     const nameInput = document.getElementById('user-name').value;
-    
-    if (nameInput.trim() === "") {
-        alert("Please enter a name!");
-        return;
-    }
+    if (nameInput.trim() === "") return alert("Please enter a name!");
 
     userData.name = nameInput;
     userData.startTime = new Date().toLocaleString();
 
-    // UI Transition
     document.getElementById('welcome-screen').classList.add('hidden');
     document.getElementById('quiz-area').classList.remove('hidden');
     document.getElementById('user-display').innerText = `Vibing as: ${userData.name}`;
@@ -73,30 +82,55 @@ async function startQuiz() {
 }
 
 function loadQuestion() {
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    
+    // Clear old buttons
+    optionsEl.innerHTML = "";
+
     if (currentQuestionIndex < questions.length) {
-        const q = questions[currentQuestionIndex];
-        document.getElementById('question').innerText = q.q;
+        const currentQ = questions[currentQuestionIndex];
+        questionEl.innerText = currentQ.q;
+
+        // Create buttons for each option
+        currentQ.options.forEach(option => {
+            const btn = document.createElement('button');
+            btn.innerText = option;
+            btn.className = "w-full text-left p-3 rounded bg-slate-700 hover:bg-slate-600 transition border border-slate-600";
+            btn.onclick = () => handleAnswer(option);
+            optionsEl.appendChild(btn);
+        });
     } else {
         showResults();
     }
 }
 
-function handleAnswer(choice) {
+function handleAnswer(selectedOption) {
+    const currentQ = questions[currentQuestionIndex];
+
+    // Check if correct and add point
+    if (selectedOption === currentQ.correct) {
+        userData.score += 1;
+    }
+
+    // Record answer for the database
     userData.answers.push({
-        question: questions[currentQuestionIndex].q,
-        answer: choice
+        question: currentQ.q,
+        selected: selectedOption,
+        wasCorrect: selectedOption === currentQ.correct
     });
     
     currentQuestionIndex++;
     loadQuestion();
 }
 
-// 4. Final Submission
+// 4. Submission Logic
 async function showResults() {
     document.getElementById('quiz-area').innerHTML = `
         <div class="text-center">
-            <h2 class="text-2xl font-bold mb-4">Quiz Complete!</h2>
-            <p class="mb-6 text-slate-400">Saving your results to the sheet...</p>
+            <h2 class="text-2xl font-bold mb-2">Quiz Complete!</h2>
+            <p class="text-cyan-400 text-xl font-bold mb-4">Your Score: ${userData.score} / ${questions.length}</p>
+            <p class="mb-6 text-slate-400 italic">Sending your data to the cloud...</p>
             <div class="animate-spin h-8 w-8 border-4 border-cyan-500 border-t-transparent rounded-full mx-auto"></div>
         </div>
     `;
@@ -105,14 +139,14 @@ async function showResults() {
     
     document.getElementById('quiz-area').innerHTML = `
         <div class="text-center">
-            <h2 class="text-2xl font-bold mb-4 text-green-400">All Set!</h2>
-            <p>Your data has been logged to the Google Sheet.</p>
+            <h2 class="text-2xl font-bold mb-2 text-green-400">Data Logged!</h2>
+            <p class="mb-4">Final Score: ${userData.score} / ${questions.length}</p>
+            <button onclick="location.reload()" class="bg-slate-700 px-4 py-2 rounded text-sm">Restart</button>
         </div>
     `;
 }
 
 async function submitResults() {
-    console.log("Sending data:", userData);
     try {
         await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
@@ -120,9 +154,7 @@ async function submitResults() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userData)
         });
-    } catch (error) {
-        console.error("Error saving data:", error);
-    }
+    } catch (e) { console.error(e); }
 }
     </script>
 </body>
