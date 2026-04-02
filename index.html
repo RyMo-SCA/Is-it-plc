@@ -6,91 +6,37 @@
     <title>PLC Expert Assessment</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-        
-        /* THE FIX: Force the background to be a fixed, non-stretching layer */
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #020617; /* Fallback color */
-        }
-
-        .bg-fixed-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -20;
-            background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2Vxc2NueWljcXN2N3V3eXIwMTRza2hvcXpvMGE2aTB1eGhqNmJ5MiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7AtHoQ9XWbpwLRxs0t/giphy.gif');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 0.5; /* Dims the GIF so it's not distracting */
-        }
-
-        .overlay-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -10;
-            background: rgba(2, 6, 23, 0.4); /* Dark tint */
-            backdrop-filter: blur(2px); /* Slight blur to prevent pixelation */
-        }
-
-        body { 
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Chart visual styling */
-        canvas { filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.1)); }
-    </style>
 </head>
-<body class="p-4 text-white">
+<body class="bg-slate-900 text-white font-sans flex items-center justify-center min-h-screen p-4">
 
-    <div class="bg-fixed-layer"></div>
-    <div class="overlay-layer"></div>
-
-    <div id="quiz-container" 
-         class="max-w-2xl w-full p-8 bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl relative z-10 transition-all duration-500">
+    <div id="quiz-container" class="max-w-2xl w-full p-8 bg-slate-800 rounded-2xl shadow-2xl">
         
         <div id="welcome-screen" class="text-center">
-            <h1 class="text-4xl font-extrabold mb-2 text-cyan-400 tracking-tight">PLC Assessment</h1>
-            <p class="text-slate-300 mb-8 text-lg">Analyze your proficiency across the Product Life Cycle.</p>
-            
-            <input type="text" id="user-name" placeholder="Enter your full name" 
-                class="w-full p-4 rounded-xl bg-slate-800/80 border border-slate-600 mb-6 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white placeholder-slate-500">
-            
+            <h1 class="text-3xl font-bold mb-2 text-cyan-400">PLC Assessment</h1>
+            <p class="text-slate-400 mb-6">Analyze your Product Life Cycle knowledge.</p>
+            <input type="text" id="user-name" placeholder="Enter your name" 
+                class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white">
             <button onclick="startQuiz()" 
-                class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-4 px-6 rounded-xl transition duration-300 transform hover:scale-[1.01] active:scale-95 shadow-lg shadow-cyan-500/20">
+                class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
                 Begin Assessment
             </button>
         </div>
 
         <div id="quiz-area" class="hidden">
-            <div class="flex justify-between items-center mb-8">
-                <span class="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs font-bold border border-cyan-500/30" id="user-display"></span>
-                <span id="progress-text" class="text-sm font-medium text-slate-400"></span>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xs uppercase tracking-widest text-slate-500" id="user-display"></h2>
+                <span id="progress-text" class="text-xs text-cyan-500 font-bold"></span>
             </div>
-            <h2 class="text-2xl font-semibold mb-8 leading-tight" id="question"></h2>
-            <div id="options" class="grid grid-cols-1 gap-4"></div>
+            <p class="text-xl font-medium mb-8" id="question"></p>
+            <div id="options" class="grid grid-cols-1 gap-3"></div>
         </div>
 
         <div id="results-area" class="hidden text-center">
-            <h2 class="text-3xl font-bold mb-2 text-white">Assessment Profile</h2>
-            <p class="text-slate-400 mb-8" id="final-score-text"></p>
-            <div class="mb-8 flex justify-center bg-slate-800/40 rounded-2xl p-6 border border-white/5">
-                <canvas id="scoreChart" style="max-width: 400px; max-height: 400px;"></canvas>
+            <h2 class="text-2xl font-bold mb-4 text-cyan-400">Assessment Profile</h2>
+            <div class="mb-6 h-[350px] flex justify-center">
+                <canvas id="scoreChart"></canvas>
             </div>
-            <button onclick="location.reload()" class="bg-slate-700 hover:bg-slate-600 px-8 py-3 rounded-xl font-bold transition">Restart Analysis</button>
+            <button onclick="location.reload()" class="bg-slate-700 px-6 py-2 rounded-lg font-bold hover:bg-slate-600">Restart</button>
         </div>
     </div>
 
@@ -109,19 +55,19 @@
             }
         };
 
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtgoreHCHdvsSVtYdQH_n7KCr4GY50UAnQCLV0KN3BhmVm6c3KLhgEY5EYCUKaErztbg/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyS3j-NkLMw7s8catwa9kxHgbayJ515ybi0fKTO-DhYS4_Ia-K37mHPrI1hTWdkkSncAw/exec";
 
         const questions = [
-            { q: "What is the correct sequence of the five stages of the Product Lifecycle Workflow?", cat: "PLC Workflow Overall", options: ["Concept + NPI, Prototype + Test, Design + Development, Launch + Production, Maintain + Support", "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support", "Design + Development, Concept + NPI, Launch + Production, Prototype + Test, Maintain + Support", "Ideation, Launch + Production, Design + Development, Prototype + Test, Maintain + Support"], correct: "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support" },
-            { q: "What is the primary goal of the 'Concept + NPI' stage?", cat: "Concept & NPI", options: ["To engineer features.", "To manufacture at scale.", "To generate and refine an idea that fulfills a market need.", "To build a model for UX."], correct: "To generate and refine an idea that fulfills a market need." },
-            { q: "During 'Design + Development', what is the core focus of the project team?", cat: "Design & Development", options: ["Customer support.", "Engineering features for feasibility and functionality.", "Scaling production.", "Testing physical models."], correct: "Engineering features for feasibility and functionality." },
+            { q: "What is the correct sequence of the five stages?", cat: "PLC Workflow Overall", options: ["Concept + NPI, Prototype + Test, Design + Development, Launch + Production, Maintain + Support", "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support", "Design + Development, Concept + NPI, Launch + Production, Prototype + Test, Maintain + Support", "Ideation, Launch + Production, Design + Development, Prototype + Test, Maintain + Support"], correct: "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support" },
+            { q: "Primary goal of 'Concept + NPI'?", cat: "Concept & NPI", options: ["To engineer features.", "To manufacture at scale.", "To generate/refine an idea for market need.", "To build a model for UX."], correct: "To generate/refine an idea for market need." },
+            { q: "Core focus during 'Design + Development'?", cat: "Design & Development", options: ["Customer support.", "Engineering features for feasibility.", "Scaling production.", "Testing physical models."], correct: "Engineering features for feasibility." },
             { q: "Which methodology prioritizes ease of assembly and cost reduction in design?", cat: "Design & Development", options: ["DFMA", "8D", "CAPA", "Value Stream Mapping"], correct: "DFMA" },
-            { q: "What defines the 'Prototype + Test' (or Pilot) phase?", cat: "Prototype & Test", options: ["Feedback surveys.", "Building a model to validate design and functionality.", "Sunsetting products.", "Marketing campaigns."], correct: "Building a model to validate design and functionality." },
-            { q: "Which Lean methodology is used specifically for 'Root Cause Analysis' during pilot phases?", cat: "Prototype & Test", options: ["Market Canvas", "PERT Chart", "The 5 Whys", "SIPOC"], correct: "The 5 Whys" },
-            { q: "What is the overarching objective of the 'Launch + Production' stage?", cat: "Launch & Production", options: ["Manufacture at scale with quality and efficiency.", "Budget approvals.", "Track complaints.", "Visual brainstorming."], correct: "Manufacture at scale with quality and efficiency." },
-            { q: "Which method allows teams to visualize the journey from supplier to customer?", cat: "Launch & Production", options: ["Stakeholder Mapping", "Customer Journey", "SQCDP", "Value Stream Mapping"], correct: "Value Stream Mapping" },
-            { q: "What is a critical function of the 'Maintain + Support' stage?", cat: "Maintain & Support", options: ["Focus groups.", "Tracking customer issues, updates, and maintenance.", "Writing code.", "Supply chain logistics."], correct: "Tracking customer issues, updates, and maintenance." },
-            { q: "Which tool is best used to determine the critical path in complex PLC workflows?", cat: "PLC Workflow Overall", options: ["PERT Chart", "5S", "PDCA", "8 Wastes"], correct: "PERT Chart" }
+            { q: "What defines 'Prototype + Test'?", cat: "Prototype & Test", options: ["Feedback surveys.", "Building a model to validate design.", "Sunsetting products.", "Marketing campaigns."], correct: "Building a model to validate design." },
+            { q: "Lean method for 'Root Cause Analysis' used in pilot phases?", cat: "Prototype & Test", options: ["Market Canvas", "PERT Chart", "The 5 Whys", "SIPOC"], correct: "The 5 Whys" },
+            { q: "Objective of 'Launch + Production' stage?", cat: "Launch & Production", options: ["Manufacture at scale with quality.", "Budget approvals.", "Track complaints.", "Visual brainstorming."], correct: "Manufacture at scale with quality." },
+            { q: "Method to visualize the journey from supplier to customer?", cat: "Launch & Production", options: ["Stakeholder Mapping", "Customer Journey", "SQCDP", "Value Stream Mapping"], correct: "Value Stream Mapping" },
+            { q: "Critical function of 'Maintain + Support'?", cat: "Maintain & Support", options: ["Focus groups.", "Tracking issues and maintenance.", "Writing code.", "Supply chain logistics."], correct: "Tracking issues and maintenance." },
+            { q: "Tool used to determine the critical path in complex PLC workflows?", cat: "PLC Workflow Overall", options: ["PERT Chart", "5S", "PDCA", "8 Wastes"], correct: "PERT Chart" }
         ];
 
         let currentIndex = 0;
@@ -133,20 +79,22 @@
             userData.startTime = new Date().toLocaleString();
             document.getElementById('welcome-screen').classList.add('hidden');
             document.getElementById('quiz-area').classList.remove('hidden');
-            document.getElementById('user-display').innerText = name;
+            document.getElementById('user-display').innerText = `Analyst: ${name}`;
             loadQuestion();
         }
 
         function loadQuestion() {
             if (currentIndex >= questions.length) return showResults();
+            
             const q = questions[currentIndex];
-            document.getElementById('progress-text').innerText = `Question ${currentIndex + 1} of ${questions.length}`;
+            document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${questions.length}`;
             document.getElementById('question').innerText = q.q;
+            
             const optionsEl = document.getElementById('options');
             optionsEl.innerHTML = "";
             q.options.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = "text-left p-4 rounded-xl bg-slate-800/60 hover:bg-cyan-600/20 border border-slate-700 hover:border-cyan-500/50 transition-all text-sm leading-relaxed";
+                btn.className = "text-left p-4 rounded-xl bg-slate-700 hover:bg-cyan-900 border border-slate-600 transition-all text-sm";
                 btn.innerText = opt;
                 btn.onclick = () => handleAnswer(opt);
                 optionsEl.appendChild(btn);
@@ -156,11 +104,13 @@
         function handleAnswer(answer) {
             const q = questions[currentIndex];
             const isCorrect = answer === q.correct;
+            
             userData.categoryScores[q.cat].total++;
             if (isCorrect) {
                 userData.categoryScores[q.cat].correct++;
                 userData.score++;
             }
+            
             currentIndex++;
             loadQuestion();
         }
@@ -168,7 +118,7 @@
         async function showResults() {
             document.getElementById('quiz-area').classList.add('hidden');
             document.getElementById('results-area').classList.remove('hidden');
-            document.getElementById('final-score-text').innerText = `Total Accuracy: ${Math.round((userData.score / questions.length) * 100)}%`;
+            
             renderChart();
             await submitResults();
         }
@@ -186,14 +136,12 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Proficiency',
+                        label: 'Proficiency %',
                         data: scores,
                         backgroundColor: 'rgba(34, 211, 238, 0.2)',
-                        borderColor: '#22d3ee',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#22d3ee',
-                        pointHoverRadius: 8
+                        borderColor: 'rgba(34, 211, 238, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(34, 211, 238, 1)'
                     }]
                 },
                 options: {
@@ -202,10 +150,10 @@
                             min: 0,
                             max: 100,
                             beginAtZero: true,
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: '#334155' },
+                            angleLines: { color: '#334155' },
                             ticks: { display: false },
-                            pointLabels: { color: '#94a3b8', font: { size: 11, weight: '600' } }
+                            pointLabels: { color: '#94a3b8', font: { size: 10 } }
                         }
                     },
                     plugins: { legend: { display: false } }
@@ -220,7 +168,7 @@
                     mode: 'no-cors',
                     body: JSON.stringify(userData)
                 });
-            } catch (e) { console.log("Data sync attempted."); }
+            } catch (e) { console.log(e); }
         }
     </script>
 </body>
