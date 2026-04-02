@@ -3,28 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Is it Product Life Cycle?</title>
+    <title>PLC Expert Assessment</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-slate-900 text-white font-sans flex items-center justify-center min-h-screen">
+<body class="bg-slate-900 text-white font-sans flex items-center justify-center min-h-screen p-4">
 
-    <div id="quiz-container" class="max-w-md w-full p-8 bg-slate-800 rounded-2xl shadow-2xl">
+    <div id="quiz-container" class="max-w-2xl w-full p-8 bg-slate-800 rounded-2xl shadow-2xl">
         
         <div id="welcome-screen" class="text-center">
-            <h1 class="text-3xl font-bold mb-2 text-cyan-400">PLC Quiz</h1>
-            <p class="text-slate-400 mb-6">Master the Product Life Cycle Workflow</p>
+            <h1 class="text-3xl font-bold mb-2 text-cyan-400">PLC Assessment</h1>
+            <p class="text-slate-400 mb-6">Analyze your Product Life Cycle knowledge.</p>
             <input type="text" id="user-name" placeholder="Enter your name" 
                 class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white">
             <button onclick="startQuiz()" 
                 class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
-                Enter Quiz
+                Begin Assessment
             </button>
         </div>
 
-        <div id="quiz-area" class="hidden text-left">
-            <h2 class="text-xs uppercase tracking-widest text-slate-500 mb-2" id="user-display"></h2>
-            <p class="text-lg font-medium mb-6" id="question">Loading question...</p>
-            <div id="options" class="space-y-3"></div>
+        <div id="quiz-area" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xs uppercase tracking-widest text-slate-500" id="user-display"></h2>
+                <span id="progress-text" class="text-xs text-cyan-500 font-bold"></span>
+            </div>
+            <p class="text-xl font-medium mb-8" id="question"></p>
+            <div id="options" class="grid grid-cols-1 gap-3"></div>
+        </div>
+
+        <div id="results-area" class="hidden text-center">
+            <h2 class="text-2xl font-bold mb-4 text-cyan-400">Assessment Profile</h2>
+            <div class="mb-6 h-[350px] flex justify-center">
+                <canvas id="scoreChart"></canvas>
+            </div>
+            <button onclick="location.reload()" class="bg-slate-700 px-6 py-2 rounded-lg font-bold hover:bg-slate-600">Restart</button>
         </div>
     </div>
 
@@ -34,112 +46,129 @@
             startTime: "", 
             score: 0, 
             categoryScores: {
-                "Concept": { correct: 0, total: 0 },
-                "Design": { correct: 0, total: 0 },
-                "Prototyping": { correct: 0, total: 0 },
-                "Production": { correct: 0, total: 0 },
-                "Support": { correct: 0, total: 0 },
-                "Planning": { correct: 0, total: 0 }
+                "PLC Workflow Overall": { correct: 0, total: 0 },
+                "Concept & NPI": { correct: 0, total: 0 },
+                "Design & Development": { correct: 0, total: 0 },
+                "Prototype & Test": { correct: 0, total: 0 },
+                "Launch & Production": { correct: 0, total: 0 },
+                "Maintain & Support": { correct: 0, total: 0 }
             }
         };
 
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtgoreHCHdvsSVtYdQH_n7KCr4GY50UAnQCLV0KN3BhmVm6c3KLhgEY5EYCUKaErztbg/exec";
 
         const questions = [
-            { q: "What is the correct sequence of the five stages?", stage: "Concept", options: ["Concept + NPI, Prototype + Test, Design + Development, Launch + Production, Maintain + Support", "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support", "Design + Development, Concept + NPI, Launch + Production, Prototype + Test, Maintain + Support", "Ideation, Launch + Production, Design + Development, Prototype + Test, Maintain + Support"], correct: "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support" },
-            { q: "Primary goal of 'Concept + NPI'?", stage: "Concept", options: ["To engineer features.", "To manufacture at scale.", "To generate/refine an idea for market need.", "To build a model for UX."], correct: "To generate/refine an idea for market need." },
-            { q: "Core focus during 'Design + Development'?", stage: "Design", options: ["Customer support.", "Engineering features for feasibility.", "Scaling production.", "Testing physical models."], correct: "Engineering features for feasibility." },
-            { q: "Methodology for ease of manufacturing?", stage: "Design", options: ["DFMA", "8D", "CAPA", "Value Stream Mapping"], correct: "DFMA" },
-            { q: "What defines 'Prototype + Test'?", stage: "Prototyping", options: ["Feedback surveys.", "Building a model to validate design.", "Sunsetting products.", "Marketing campaigns."], correct: "Building a model to validate design." },
-            { q: "Lean method for 'Root Cause Analysis'?", stage: "Prototyping", options: ["Market Canvas", "PERT Chart", "The 5 Whys", "SIPOC"], correct: "The 5 Whys" },
-            { q: "Objective of 'Launch + Production'?", stage: "Production", options: ["Manufacture at scale with quality.", "Budget approvals.", "Track complaints.", "Visual brainstorming."], correct: "Manufacture at scale with quality." },
-            { q: "Visualize journey from supplier to customer?", stage: "Production", options: ["Stakeholder Mapping", "Customer Journey", "SQCDP", "Value Stream Mapping"], correct: "Value Stream Mapping" },
-            { q: "Critical function of 'Maintain + Support'?", stage: "Support", options: ["Focus groups.", "Tracking issues and maintenance.", "Writing code.", "Supply chain logistics."], correct: "Tracking issues and maintenance." },
-            { q: "Map used for critical path/timelines?", stage: "Planning", options: ["PERT Chart", "5S", "PDCA", "8 Wastes"], correct: "PERT Chart" }
+            { q: "What is the correct sequence of the five stages?", cat: "PLC Workflow Overall", options: ["Concept + NPI, Prototype + Test, Design + Development, Launch + Production, Maintain + Support", "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support", "Design + Development, Concept + NPI, Launch + Production, Prototype + Test, Maintain + Support", "Ideation, Launch + Production, Design + Development, Prototype + Test, Maintain + Support"], correct: "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support" },
+            { q: "Primary goal of 'Concept + NPI'?", cat: "Concept & NPI", options: ["To engineer features.", "To manufacture at scale.", "To generate/refine an idea for market need.", "To build a model for UX."], correct: "To generate/refine an idea for market need." },
+            { q: "Core focus during 'Design + Development'?", cat: "Design & Development", options: ["Customer support.", "Engineering features for feasibility.", "Scaling production.", "Testing physical models."], correct: "Engineering features for feasibility." },
+            { q: "Which methodology prioritizes ease of assembly and cost reduction in design?", cat: "Design & Development", options: ["DFMA", "8D", "CAPA", "Value Stream Mapping"], correct: "DFMA" },
+            { q: "What defines 'Prototype + Test'?", cat: "Prototype & Test", options: ["Feedback surveys.", "Building a model to validate design.", "Sunsetting products.", "Marketing campaigns."], correct: "Building a model to validate design." },
+            { q: "Lean method for 'Root Cause Analysis' used in pilot phases?", cat: "Prototype & Test", options: ["Market Canvas", "PERT Chart", "The 5 Whys", "SIPOC"], correct: "The 5 Whys" },
+            { q: "Objective of 'Launch + Production' stage?", cat: "Launch & Production", options: ["Manufacture at scale with quality.", "Budget approvals.", "Track complaints.", "Visual brainstorming."], correct: "Manufacture at scale with quality." },
+            { q: "Method to visualize the journey from supplier to customer?", cat: "Launch & Production", options: ["Stakeholder Mapping", "Customer Journey", "SQCDP", "Value Stream Mapping"], correct: "Value Stream Mapping" },
+            { q: "Critical function of 'Maintain + Support'?", cat: "Maintain & Support", options: ["Focus groups.", "Tracking issues and maintenance.", "Writing code.", "Supply chain logistics."], correct: "Tracking issues and maintenance." },
+            { q: "Tool used to determine the critical path in complex PLC workflows?", cat: "PLC Workflow Overall", options: ["PERT Chart", "5S", "PDCA", "8 Wastes"], correct: "PERT Chart" }
         ];
 
-        let currentQuestionIndex = 0;
+        let currentIndex = 0;
 
         function startQuiz() {
-            const nameInput = document.getElementById('user-name').value;
-            if (nameInput.trim() === "") return alert("Please enter your name!");
-
-            userData.name = nameInput;
+            const name = document.getElementById('user-name').value;
+            if (!name) return alert("Please enter your name!");
+            userData.name = name;
             userData.startTime = new Date().toLocaleString();
-
             document.getElementById('welcome-screen').classList.add('hidden');
             document.getElementById('quiz-area').classList.remove('hidden');
-            document.getElementById('user-display').innerText = `Candidate: ${userData.name}`;
-            
+            document.getElementById('user-display').innerText = `Analyst: ${name}`;
             loadQuestion();
         }
 
         function loadQuestion() {
+            if (currentIndex >= questions.length) return showResults();
+            
+            const q = questions[currentIndex];
+            document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${questions.length}`;
+            document.getElementById('question').innerText = q.q;
+            
             const optionsEl = document.getElementById('options');
             optionsEl.innerHTML = "";
-
-            if (currentQuestionIndex < questions.length) {
-                const currentQ = questions[currentQuestionIndex];
-                document.getElementById('question').innerText = `${currentQuestionIndex + 1}. ${currentQ.q}`;
-
-                currentQ.options.forEach(option => {
-                    const btn = document.createElement('button');
-                    btn.innerText = option;
-                    btn.className = "w-full text-left p-3 rounded bg-slate-700 hover:bg-slate-600 transition border border-slate-600 text-sm";
-                    btn.onclick = () => handleAnswer(option);
-                    optionsEl.appendChild(btn);
-                });
-            } else {
-                showResults();
-            }
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "text-left p-4 rounded-xl bg-slate-700 hover:bg-cyan-900 border border-slate-600 transition-all text-sm";
+                btn.innerText = opt;
+                btn.onclick = () => handleAnswer(opt);
+                optionsEl.appendChild(btn);
+            });
         }
 
-        function handleAnswer(selectedOption) {
-            const currentQ = questions[currentQuestionIndex];
-            const isCorrect = selectedOption === currentQ.correct;
-
-            if (isCorrect) userData.score += 1;
+        function handleAnswer(answer) {
+            const q = questions[currentIndex];
+            const isCorrect = answer === q.correct;
             
-            userData.categoryScores[currentQ.stage].total += 1;
-            if (isCorrect) userData.categoryScores[currentQ.stage].correct += 1;
-
-            currentQuestionIndex++;
+            userData.categoryScores[q.cat].total++;
+            if (isCorrect) {
+                userData.categoryScores[q.cat].correct++;
+                userData.score++;
+            }
+            
+            currentIndex++;
             loadQuestion();
         }
 
         async function showResults() {
-            let feedbackHTML = `<h3 class="text-cyan-400 font-bold mb-4">Stage Breakdown:</h3>`;
+            document.getElementById('quiz-area').classList.add('hidden');
+            document.getElementById('results-area').classList.remove('hidden');
             
-            for (const [stage, data] of Object.entries(userData.categoryScores)) {
-                const percent = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
-                feedbackHTML += `
-                    <div class="flex justify-between text-sm mb-2 border-b border-slate-700 pb-1">
-                        <span>${stage}:</span>
-                        <span class="font-bold ${percent >= 70 ? 'text-green-400' : 'text-yellow-400'}">${percent}%</span>
-                    </div>`;
-            }
-
-            document.getElementById('quiz-area').innerHTML = `
-                <div class="text-center">
-                    <h2 class="text-2xl font-bold mb-2 text-white">Score: ${userData.score} / 10</h2>
-                    <div class="bg-slate-900 p-4 rounded-lg mb-6 text-left">
-                        ${feedbackHTML}
-                    </div>
-                    <button onclick="location.reload()" class="bg-cyan-600 px-6 py-2 rounded-lg font-bold">Restart</button>
-                </div>
-            `;
+            renderChart();
             await submitResults();
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            const labels = Object.keys(userData.categoryScores);
+            const scores = labels.map(label => {
+                const cat = userData.categoryScores[label];
+                return cat.total > 0 ? (cat.correct / cat.total) * 100 : 0;
+            });
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Proficiency %',
+                        data: scores,
+                        backgroundColor: 'rgba(34, 211, 238, 0.2)',
+                        borderColor: 'rgba(34, 211, 238, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(34, 211, 238, 1)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            beginAtZero: true,
+                            grid: { color: '#334155' },
+                            angleLines: { color: '#334155' },
+                            ticks: { display: false },
+                            pointLabels: { color: '#94a3b8', font: { size: 10 } }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
         }
 
         async function submitResults() {
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors', 
-                    headers: { 'Content-Type': 'application/json' },
+                    mode: 'no-cors',
                     body: JSON.stringify(userData)
                 });
-            } catch (e) { console.error(e); }
+            } catch (e) { console.log(e); }
         }
     </script>
 </body>
