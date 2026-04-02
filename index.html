@@ -12,103 +12,135 @@
         
         <div id="welcome-screen" class="text-center">
             <h1 class="text-3xl font-bold mb-2 text-cyan-400">PLC Quiz</h1>
-            <p class="text-slate-400 mb-6">Determine the stage of your product.</p>
-            
+            <p class="text-slate-400 mb-6">Master the Product Life Cycle Workflow</p>
             <input type="text" id="user-name" placeholder="Enter your name" 
                 class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white">
-            
             <button onclick="startQuiz()" 
                 class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
                 Enter Quiz
             </button>
         </div>
 
-        <div id="quiz-area" class="hidden">
-            <h2 class="text-sm uppercase tracking-widest text-slate-500 mb-2" id="user-display"></h2>
-            <p class="text-lg mb-6" id="question">Loading question...</p>
-            <div id="options" class="space-y-3">
-                <button onclick="handleAnswer('Yes')" class="w-full text-left p-3 rounded bg-slate-700 hover:bg-slate-600 transition">Yes</button>
-                <button onclick="handleAnswer('No')" class="w-full text-left p-3 rounded bg-slate-700 hover:bg-slate-600 transition mt-2">No</button>
-            </div>
+        <div id="quiz-area" class="hidden text-left">
+            <h2 class="text-xs uppercase tracking-widest text-slate-500 mb-2" id="user-display"></h2>
+            <p class="text-lg font-medium mb-6" id="question">Loading question...</p>
+            <div id="options" class="space-y-3"></div>
         </div>
     </div>
 
     <script>
-let userData = { 
-    name: "", 
-    startTime: "", 
-    score: 0, 
-    // New Categorized Tracking
-    categoryScores: {
-        "Concept": { correct: 0, total: 0 },
-        "Design": { correct: 0, total: 0 },
-        "Prototyping": { correct: 0, total: 0 },
-        "Production": { correct: 0, total: 0 },
-        "Support": { correct: 0, total: 0 },
-        "Planning": { correct: 0, total: 0 }
-    }
-};
+        let userData = { 
+            name: "", 
+            startTime: "", 
+            score: 0, 
+            categoryScores: {
+                "Concept": { correct: 0, total: 0 },
+                "Design": { correct: 0, total: 0 },
+                "Prototyping": { correct: 0, total: 0 },
+                "Production": { correct: 0, total: 0 },
+                "Support": { correct: 0, total: 0 },
+                "Planning": { correct: 0, total: 0 }
+            }
+        };
 
-const questions = [
-    { q: "Sequence of the five stages?", stage: "Concept", correct: "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support", options: [...] },
-    { q: "Goal of Concept + NPI?", stage: "Concept", correct: "To generate and refine a product idea that fulfills a market need.", options: [...] },
-    { q: "Focus of Design + Development?", stage: "Design", correct: "Engineering the features of the product to ensure its feasibility and functionality.", options: [...] },
-    { q: "Methodology for ease of assembly (DFMA)?", stage: "Design", correct: "DFMA", options: [...] },
-    { q: "What defines Prototype + Test?", stage: "Prototyping", correct: "Building a model of the product to validate its design and functionality.", options: [...] },
-    { q: "Methodology for Root Cause (5 Whys)?", stage: "Prototyping", correct: "The 5 Whys", options: [...] },
-    { q: "Objective of Launch + Production?", stage: "Production", correct: "To manufacture the product at scale while maintaining quality and efficiency.", options: [...] },
-    { q: "Visualize journey (Value Stream Mapping)?", stage: "Production", correct: "Value Stream Mapping", options: [...] },
-    { q: "Function of Maintain + Support?", stage: "Support", correct: "Ensuring customer satisfaction by tracking issues and updates.", options: [...] },
-    { q: "Visual map for critical path (PERT)?", stage: "Planning", correct: "PERT Chart", options: [...] }
-];
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtgoreHCHdvsSVtYdQH_n7KCr4GY50UAnQCLV0KN3BhmVm6c3KLhgEY5EYCUKaErztbg/exec";
 
-// ... (startQuiz and loadQuestion remain the same)
+        const questions = [
+            { q: "What is the correct sequence of the five stages?", stage: "Concept", options: ["Concept + NPI, Prototype + Test, Design + Development, Launch + Production, Maintain + Support", "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support", "Design + Development, Concept + NPI, Launch + Production, Prototype + Test, Maintain + Support", "Ideation, Launch + Production, Design + Development, Prototype + Test, Maintain + Support"], correct: "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support" },
+            { q: "Primary goal of 'Concept + NPI'?", stage: "Concept", options: ["To engineer features.", "To manufacture at scale.", "To generate/refine an idea for market need.", "To build a model for UX."], correct: "To generate/refine an idea for market need." },
+            { q: "Core focus during 'Design + Development'?", stage: "Design", options: ["Customer support.", "Engineering features for feasibility.", "Scaling production.", "Testing physical models."], correct: "Engineering features for feasibility." },
+            { q: "Methodology for ease of manufacturing?", stage: "Design", options: ["DFMA", "8D", "CAPA", "Value Stream Mapping"], correct: "DFMA" },
+            { q: "What defines 'Prototype + Test'?", stage: "Prototyping", options: ["Feedback surveys.", "Building a model to validate design.", "Sunsetting products.", "Marketing campaigns."], correct: "Building a model to validate design." },
+            { q: "Lean method for 'Root Cause Analysis'?", stage: "Prototyping", options: ["Market Canvas", "PERT Chart", "The 5 Whys", "SIPOC"], correct: "The 5 Whys" },
+            { q: "Objective of 'Launch + Production'?", stage: "Production", options: ["Manufacture at scale with quality.", "Budget approvals.", "Track complaints.", "Visual brainstorming."], correct: "Manufacture at scale with quality." },
+            { q: "Visualize journey from supplier to customer?", stage: "Production", options: ["Stakeholder Mapping", "Customer Journey", "SQCDP", "Value Stream Mapping"], correct: "Value Stream Mapping" },
+            { q: "Critical function of 'Maintain + Support'?", stage: "Support", options: ["Focus groups.", "Tracking issues and maintenance.", "Writing code.", "Supply chain logistics."], correct: "Tracking issues and maintenance." },
+            { q: "Map used for critical path/timelines?", stage: "Planning", options: ["PERT Chart", "5S", "PDCA", "8 Wastes"], correct: "PERT Chart" }
+        ];
 
-function handleAnswer(selectedOption) {
-    const currentQ = questions[currentQuestionIndex];
-    const isCorrect = selectedOption === currentQ.correct;
-    
-    // Update Global Score
-    if (isCorrect) userData.score += 1;
+        let currentQuestionIndex = 0;
 
-    // Update Categorized Score
-    const stage = currentQ.stage;
-    userData.categoryScores[stage].total += 1;
-    if (isCorrect) {
-        userData.categoryScores[stage].correct += 1;
-    }
-    
-    currentQuestionIndex++;
-    loadQuestion();
-}
+        function startQuiz() {
+            const nameInput = document.getElementById('user-name').value;
+            if (nameInput.trim() === "") return alert("Please enter your name!");
 
-async function showResults() {
-    // Generate Feedback HTML based on categories
-    let feedbackHTML = `<h3 class="text-cyan-400 font-bold mb-4">Stage Breakdown:</h3>`;
-    
-    for (const [stage, data] of Object.entries(userData.categoryScores)) {
-        const percent = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
-        const color = percent >= 100 ? 'text-green-400' : percent >= 50 ? 'text-yellow-400' : 'text-red-400';
-        
-        feedbackHTML += `
-            <div class="flex justify-between text-sm mb-1 border-b border-slate-700 pb-1">
-                <span>${stage}:</span>
-                <span class="${color}">${percent}%</span>
-            </div>`;
-    }
+            userData.name = nameInput;
+            userData.startTime = new Date().toLocaleString();
 
-    document.getElementById('quiz-area').innerHTML = `
-        <div class="text-center">
-            <h2 class="text-2xl font-bold mb-2">Results for ${userData.name}</h2>
-            <div class="bg-slate-900 p-4 rounded-lg mb-6 text-left">
-                ${feedbackHTML}
-            </div>
-            <button onclick="location.reload()" class="bg-cyan-600 px-6 py-2 rounded-lg font-bold">Try Again</button>
-        </div>
-    `;
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('quiz-area').classList.remove('hidden');
+            document.getElementById('user-display').innerText = `Candidate: ${userData.name}`;
+            
+            loadQuestion();
+        }
 
-    await submitResults();
-}
+        function loadQuestion() {
+            const optionsEl = document.getElementById('options');
+            optionsEl.innerHTML = "";
+
+            if (currentQuestionIndex < questions.length) {
+                const currentQ = questions[currentQuestionIndex];
+                document.getElementById('question').innerText = `${currentQuestionIndex + 1}. ${currentQ.q}`;
+
+                currentQ.options.forEach(option => {
+                    const btn = document.createElement('button');
+                    btn.innerText = option;
+                    btn.className = "w-full text-left p-3 rounded bg-slate-700 hover:bg-slate-600 transition border border-slate-600 text-sm";
+                    btn.onclick = () => handleAnswer(option);
+                    optionsEl.appendChild(btn);
+                });
+            } else {
+                showResults();
+            }
+        }
+
+        function handleAnswer(selectedOption) {
+            const currentQ = questions[currentQuestionIndex];
+            const isCorrect = selectedOption === currentQ.correct;
+
+            if (isCorrect) userData.score += 1;
+            
+            userData.categoryScores[currentQ.stage].total += 1;
+            if (isCorrect) userData.categoryScores[currentQ.stage].correct += 1;
+
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        async function showResults() {
+            let feedbackHTML = `<h3 class="text-cyan-400 font-bold mb-4">Stage Breakdown:</h3>`;
+            
+            for (const [stage, data] of Object.entries(userData.categoryScores)) {
+                const percent = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
+                feedbackHTML += `
+                    <div class="flex justify-between text-sm mb-2 border-b border-slate-700 pb-1">
+                        <span>${stage}:</span>
+                        <span class="font-bold ${percent >= 70 ? 'text-green-400' : 'text-yellow-400'}">${percent}%</span>
+                    </div>`;
+            }
+
+            document.getElementById('quiz-area').innerHTML = `
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold mb-2 text-white">Score: ${userData.score} / 10</h2>
+                    <div class="bg-slate-900 p-4 rounded-lg mb-6 text-left">
+                        ${feedbackHTML}
+                    </div>
+                    <button onclick="location.reload()" class="bg-cyan-600 px-6 py-2 rounded-lg font-bold">Restart</button>
+                </div>
+            `;
+            await submitResults();
+        }
+
+        async function submitResults() {
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+            } catch (e) { console.error(e); }
+        }
     </script>
 </body>
 </html>
