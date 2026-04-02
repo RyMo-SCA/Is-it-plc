@@ -9,34 +9,58 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         
-        body { 
-            font-family: 'Inter', sans-serif;
-            background-color: #020617;
+        /* THE FIX: Force the background to be a fixed, non-stretching layer */
+        html, body {
             margin: 0;
-            overflow-x: hidden;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #020617; /* Fallback color */
         }
 
-        /* Custom scrollbar for a cleaner vibe */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.1); }
-        ::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.3); border-radius: 10px; }
-        
-        /* Fix for Chart.js text color */
+        .bg-fixed-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -20;
+            background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2Vxc2NueWljcXN2N3V3eXIwMTRza2hvcXpvMGE2aTB1eGhqNmJ5MiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7AtHoQ9XWbpwLRxs0t/giphy.gif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.5; /* Dims the GIF so it's not distracting */
+        }
+
+        .overlay-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -10;
+            background: rgba(2, 6, 23, 0.4); /* Dark tint */
+            backdrop-filter: blur(2px); /* Slight blur to prevent pixelation */
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Chart visual styling */
         canvas { filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.1)); }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 text-white relative">
+<body class="p-4 text-white">
 
-    <div class="fixed inset-0 -z-20 w-full h-full overflow-hidden bg-slate-950">
-        <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2Vxc2NueWljcXN2N3V3eXIwMTRza2hvcXpvMGE2aTB1eGhqNmJ5MiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7AtHoQ9XWbpwLRxs0t/giphy.gif" 
-             alt="Background"
-             class="w-full h-full object-cover opacity-50 pointer-events-none">
-    </div>
-
-    <div class="fixed inset-0 bg-slate-950/40 -z-10 backdrop-blur-[1px]"></div>
+    <div class="bg-fixed-layer"></div>
+    <div class="overlay-layer"></div>
 
     <div id="quiz-container" 
-         class="max-w-2xl w-full p-8 bg-slate-900/75 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl relative z-10 transition-all duration-500">
+         class="max-w-2xl w-full p-8 bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl relative z-10 transition-all duration-500">
         
         <div id="welcome-screen" class="text-center">
             <h1 class="text-4xl font-extrabold mb-2 text-cyan-400 tracking-tight">PLC Assessment</h1>
@@ -85,7 +109,6 @@
             }
         };
 
-        // Your Deployment URL
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtgoreHCHdvsSVtYdQH_n7KCr4GY50UAnQCLV0KN3BhmVm6c3KLhgEY5EYCUKaErztbg/exec";
 
         const questions = [
@@ -116,11 +139,9 @@
 
         function loadQuestion() {
             if (currentIndex >= questions.length) return showResults();
-            
             const q = questions[currentIndex];
             document.getElementById('progress-text').innerText = `Question ${currentIndex + 1} of ${questions.length}`;
             document.getElementById('question').innerText = q.q;
-            
             const optionsEl = document.getElementById('options');
             optionsEl.innerHTML = "";
             q.options.forEach(opt => {
@@ -135,13 +156,11 @@
         function handleAnswer(answer) {
             const q = questions[currentIndex];
             const isCorrect = answer === q.correct;
-            
             userData.categoryScores[q.cat].total++;
             if (isCorrect) {
                 userData.categoryScores[q.cat].correct++;
                 userData.score++;
             }
-            
             currentIndex++;
             loadQuestion();
         }
@@ -150,7 +169,6 @@
             document.getElementById('quiz-area').classList.add('hidden');
             document.getElementById('results-area').classList.remove('hidden');
             document.getElementById('final-score-text').innerText = `Total Accuracy: ${Math.round((userData.score / questions.length) * 100)}%`;
-            
             renderChart();
             await submitResults();
         }
