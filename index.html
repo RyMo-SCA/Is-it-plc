@@ -33,10 +33,10 @@
 
         <div id="results-area" class="hidden text-center">
             <h2 class="text-2xl font-bold mb-4 text-cyan-400">Assessment Profile</h2>
-            <div class="mb-6 h-[400px] flex justify-center">
+            <div class="mb-6 h-[400px] w-full flex justify-center">
                 <canvas id="scoreChart"></canvas>
             </div>
-            <button onclick="location.reload()" class="bg-slate-700 px-6 py-2 rounded-lg font-bold hover:bg-slate-600">Restart</button>
+            <button onclick="location.reload()" class="bg-slate-700 px-6 py-2 rounded-lg font-bold hover:bg-slate-600 mt-4">Restart</button>
         </div>
     </div>
 
@@ -118,7 +118,6 @@
         async function showResults() {
             document.getElementById('quiz-area').classList.add('hidden');
             document.getElementById('results-area').classList.remove('hidden');
-            
             renderChart();
             await submitResults();
         }
@@ -127,43 +126,42 @@
             const ctx = document.getElementById('scoreChart').getContext('2d');
             const labels = Object.keys(userData.categoryScores);
             
-            // Calculate numeric percentages
             const scores = labels.map(label => {
                 const cat = userData.categoryScores[label];
                 return cat.total > 0 ? Math.round((cat.correct / cat.total) * 100) : 0;
             });
 
-            // Calculate overall percentage for gradient logic
-            const totalPossible = questions.length;
-            const overallPercent = (userData.score / totalPossible) * 100;
+            // Color arrays to be used per point
+            const pointColors = scores.map(score => {
+                if (score >= 80) return 'rgb(34, 211, 94)';  // Green
+                if (score >= 50) return 'rgb(249, 115, 22)'; // Orange
+                return 'rgb(239, 68, 68)';                  // Red
+            });
 
-            // Determine color based on overall performance
-            let themeColor, fillColor;
-            if (overallPercent >= 80) {
-                themeColor = 'rgb(34, 211, 94)'; // Green
-                fillColor = 'rgba(34, 211, 94, 0.3)';
-            } else if (overallPercent >= 50) {
-                themeColor = 'rgb(249, 115, 22)'; // Orange
-                fillColor = 'rgba(249, 115, 22, 0.3)';
-            } else {
-                themeColor = 'rgb(239, 68, 68)'; // Red
-                fillColor = 'rgba(239, 68, 68, 0.3)';
+            const pointLabelsColors = scores.map(score => {
+                if (score >= 80) return '#4ade80';
+                if (score >= 50) return '#fb923c';
+                return '#f87171';
+            });
+
+            let chartStatus = Chart.getChart("scoreChart");
+            if (chartStatus !== undefined) {
+                chartStatus.destroy();
             }
 
             new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    // This creates labels like "Concept & NPI (100%)" at the end of each axis
                     labels: labels.map((l, i) => `${l} (${scores[i]}%)`),
                     datasets: [{
-                        label: 'Proficiency %',
                         data: scores,
-                        backgroundColor: fillColor,
-                        borderColor: themeColor,
-                        borderWidth: 3,
-                        pointBackgroundColor: themeColor,
+                        backgroundColor: 'rgba(34, 211, 238, 0.1)', // Subtle neutral fill
+                        borderColor: 'rgba(255, 255, 255, 0.3)',    // Subtle neutral border
+                        borderWidth: 2,
+                        pointBackgroundColor: pointColors,           // Dynamic Per Point
                         pointBorderColor: '#fff',
-                        pointHoverRadius: 5
+                        pointRadius: 6,
+                        pointHoverRadius: 8
                     }]
                 },
                 options: {
@@ -175,14 +173,16 @@
                             max: 100,
                             beginAtZero: true,
                             grid: { color: '#334155' },
-                            angleLines: { color: '#334155' },
-                            ticks: { display: false },
+                            angleLines: { color: '#475569' },
+                            ticks: { display: false, stepSize: 20 },
                             pointLabels: { 
-                                color: '#94a3b8', 
+                                // Callback allows us to color text based on category score
+                                color: (context) => pointLabelsColors[context.index],
                                 font: { 
                                     size: 11,
                                     weight: 'bold'
-                                } 
+                                },
+                                padding: 15
                             }
                         }
                     },
@@ -190,7 +190,7 @@
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: (context) => `Score: ${context.raw}%`
+                                label: (context) => ` Score: ${context.raw}%`
                             }
                         }
                     }
@@ -205,7 +205,7 @@
                     mode: 'no-cors',
                     body: JSON.stringify(userData)
                 });
-            } catch (e) { console.log(e); }
+            } catch (e) { console.log("Submission error:", e); }
         }
     </script>
 </body>
