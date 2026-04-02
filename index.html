@@ -35,55 +35,26 @@
 
     <script>
         // Data storage object
-        let userData = {
-            name: "",
-            startTime: "",
-            answers: []
-        };
+       let userData = { name: "", startTime: "", score: 0, answers: [] };
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtgoreHCHdvsSVtYdQH_n7KCr4GY50UAnQCLV0KN3BhmVm6c3KLhgEY5EYCUKaErztbg/exec"; // Put your URL from Step 1 here
 
-        const questions = [
-            { q: "Are your profit margins currently peaking?", stage: "Maturity" },
-            { q: "Is your main goal currently building awareness?", stage: "Introduction" }
-        ];
-
-        function startQuiz() {
-            const nameInput = document.getElementById('user-name').value;
-            
-            if (nameInput.trim() === "") {
-                alert("Please enter a name to vibe with us!");
-                return;
-            }
-
-            // Capture data and time
-            userData.name = nameInput;
-            userData.startTime = new Date().toLocaleString(); // e.g., "4/2/2026, 8:44 PM"
-
-            console.log("Session Started:", userData);
-
-            // UI Transition
-            document.getElementById('welcome-screen').classList.add('hidden');
-            document.getElementById('quiz-area').classList.remove('hidden');
-            document.getElementById('user-display').innerText = `Vibing as: ${userData.name}`;
-            
-            loadQuestion();
-        }
-
-        function loadQuestion() {
-            const q = questions[0];
-            document.getElementById('question').innerText = q.q;
-        }
-
-        function handleAnswer(choice) {
-            // Store answer data
-            userData.answers.push({
-                question: questions[0].q,
-                answer: choice,
-                timestamp: new Date().toLocaleString()
-            });
-
-            alert(`Nice one, ${userData.name}! We've logged that. Check your browser console to see the data object.`);
-            console.log("Current Data Collected:", userData);
-        }
+async function submitResults() {
+    // Show a "Saving..." vibe
+    console.log("Sending data to Google Sheets...");
+    
+    try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Critical for Google Scripts
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData)
+        });
+        alert("Results saved to the cloud!");
+    } catch (error) {
+        console.error("Error saving data:", error);
+    }
+}
     </script>
 </body>
 </html>
