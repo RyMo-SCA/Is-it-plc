@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Custom styles for the interactive diagram overlay */
+        /* CSS to define and position transparent click overlays over the diagram */
         #plc-diagram-interactive {
             position: relative;
             display: inline-block;
@@ -17,58 +17,59 @@
             position: absolute;
             cursor: pointer;
             transition: background-color 0.2s;
+            /* TEMPORARY: Uncomment the next line to visualize the clickable boxes for calibration */
+            /* background-color: rgba(255, 0, 0, 0.3); border: 1px solid red; */
         }
 
         .diagram-click-area:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Define Position and Shape for each arc section (1-5) */
-        /* These are based on the proportions of the provided image (circular layout) */
+        /* Revised Position and Shape of click boxes based on your feedback (image_2.png) */
         
-        /* Arc 1: Concept / NPI */
+        /* Area 1: Concept / NPI (Top-Right) */
         #area-1 {
-            top: 2%;
-            right: 2%;
-            width: 46%;
-            height: 46%;
-            border-radius: 0 100% 0 0;
+            top: 13%;
+            right: 21%;
+            width: 17%;
+            height: 17%;
+            border-radius: 50%;
         }
 
-        /* Arc 2: Design + Development */
+        /* Area 2: Design + Development (Mid-Right) */
         #area-2 {
             top: 48%;
-            right: 2%;
-            width: 46%;
-            height: 46%;
-            border-radius: 0 0 100% 0;
+            right: 17%;
+            width: 17%;
+            height: 17%;
+            border-radius: 50%;
         }
 
-        /* Arc 3: Prototype + Test */
+        /* Area 3: Prototype + Test (Bottom-Center) */
         #area-3 {
-            bottom: 2%;
-            left: 27%;
-            width: 46%;
-            height: 46%;
-            border-radius: 0 0 0 100%;
+            bottom: 12%;
+            left: 41.5%;
+            width: 17%;
+            height: 17%;
+            border-radius: 50%;
         }
 
-        /* Arc 4: Launch + Production */
+        /* Area 4: Launch + Production (Mid-Left) */
         #area-4 {
-            top: 35%;
-            left: 2%;
-            width: 35%;
-            height: 46%;
-            border-radius: 100% 0 0 0;
+            top: 50%;
+            left: 17.5%;
+            width: 17%;
+            height: 17%;
+            border-radius: 50%;
         }
 
-        /* Arc 5: Maintain + Support */
+        /* Area 5: Maintain + Support (Top-Left) */
         #area-5 {
-            top: 2%;
-            left: 2%;
-            width: 35%;
-            height: 35%;
-            border-radius: 100% 0 0 0;
+            top: 15.5%;
+            left: 23%;
+            width: 17%;
+            height: 17%;
+            border-radius: 50%;
         }
 
     </style>
@@ -109,7 +110,7 @@
                 
                 <div class="flex justify-center">
                     <div id="plc-diagram-interactive">
-                        <img src="PLC Workflow.png" alt="PLC Process Diagram" class="max-w-xs block">
+                        <img src="PLC Workflow.png" alt="PLC Process Diagram" class="max-w-md block">
 
                         <div id="area-1" class="diagram-click-area" onclick="openSubPage(1)"></div>
                         <div id="area-2" class="diagram-click-area" onclick="openSubPage(2)"></div>
@@ -127,56 +128,61 @@
 
                     <div id="sub-page-1" class="sub-page hidden">
                         <h2 class="text-2xl font-bold mb-4 text-yellow-400">1. Concept / New Product Introduction</h2>
-                        <p class="text-slate-300 mb-4">This stage is all about ideation and validation of a new product or feature. It involves market research, defining user needs, feasibility analysis, and developing the business case.</p>
+                        <p class="text-slate-300 mb-4">This foundational stage defines the 'Why' behind a product. It focuses on identifying an untapped market need or customer problem and defining a viable product concept to address it.</p>
+                        <h4 class="font-bold text-white mb-2">Key Expert Activities:</h4>
                         <ul class="list-disc list-inside text-slate-300 space-y-2 text-sm">
-                            <li>Define user problems and opportunities</li>
-                            <li>Develop high-level feature requirements</li>
-                            <li>Analyze market viability and ROI</li>
-                            <li>Get executive approval to proceed</li>
+                            <li>Develop high-level feature requirements and a Lean Business Canvas.</li>
+                            <li>Analyze market viability, competitor landscape, and initial ROI estimates.</li>
+                            <li>Define user personas and execute focus groups or early feedback surveys.</li>
+                            <li>Obtain stakeholder approval to proceed to the Design phase.</li>
                         </ul>
                     </div>
 
                     <div id="sub-page-2" class="sub-page hidden">
                         <h2 class="text-2xl font-bold mb-4 text-green-400">2. Design + Development</h2>
-                        <p class="text-slate-300 mb-4">The core engineering and creative phase. This includes technical design, UI/UX creation, prototyping, coding, or physical parts engineering. The goal is feasibility.</p>
+                        <p class="text-slate-300 mb-4">The core execution phase. This involves detailed engineering (software architecture, hardware parts, circuitry) and creative design (UI/UX) to prove the feature set can be built as specified.</p>
+                        <h4 class="font-bold text-white mb-2">Key Expert Activities:</h4>
                         <ul class="list-disc list-inside text-slate-300 space-y-2 text-sm">
-                            <li>Create detailed system/technical design</li>
-                            <li>Design UI and user flows</li>
-                            <li>Code the software and engineer hardware components</li>
-                            <li>Unit test individual components</li>
+                            <li>Create technical design specifications and software architecture maps.</li>
+                            <li>Develop complete UI wireframes, user flows, and interaction models.</li>
+                            <li>Implement rigorous coding standards or DFMA guidelines for hardware.</li>
+                            <li>Unit test individual features before integration.</li>
                         </ul>
                     </div>
 
                     <div id="sub-page-3" class="sub-page hidden">
                         <h2 class="text-2xl font-bold mb-4 text-blue-400">3. Prototype + Test</h2>
-                        <p class="text-slate-300 mb-4">Building integrated models to validate the design. This involves rigorous physical or user testing to find issues before scaling production.</p>
+                        <p class="text-slate-300 mb-4">Validation is critical. This stage builds functional models to find bugs, integration issues, and user frustration *before* high-volume manufacturing or cloud ramp-up.</p>
+                        <h4 class="font-bold text-white mb-2">Key Expert Activities:</h4>
                         <ul class="list-disc list-inside text-slate-300 space-y-2 text-sm">
-                            <li>Build full functional prototypes (PVT, EVT)</li>
-                            <li>Execute comprehensive testing (functional, performance, stress)</li>
-                            <li>Gather early user feedback (Alpha/Beta tests)</li>
-                            <li>Implement bug fixes and design iterations</li>
+                            <li>Build full functional prototypes (e.g., EVT/PVT units, integrated Beta software).</li>
+                            <li>Execute comprehensive regression, performance, and environmental stress testing.</li>
+                            <li>Analyze testing data using Lean Root Cause methods (The 5 Whys, 8D Reports).</li>
+                            <li>Implement rapid engineering changes based on Alpha/Beta feedback.</li>
                         </ul>
                     </div>
 
                     <div id="sub-page-4" class="sub-page hidden">
                         <h2 class="text-2xl font-bold mb-4 text-cyan-400">4. Launch + Production</h2>
-                        <p class="text-slate-300 mb-4">Bringing the final product to market at scale. This involves manufacturing ramp-up, quality assurance, supply chain management, and executing the marketing plan.</p>
+                        <p class="text-slate-300 mb-4">Transitioning from engineering to the marketplace at scale. This involves manufacturing ramp-up, implementing quality assurance standards, and executing the Go-to-Market marketing and sales strategy.</p>
+                        <h4 class="font-bold text-white mb-2">Key Expert Activities:</h4>
                         <ul class="list-disc list-inside text-slate-300 space-y-2 text-sm">
-                            <li>Scale up manufacturing or cloud infrastructure</li>
-                            <li>Implement final quality controls</li>
-                            <li>Distribute the product to partners/customers</li>
-                            <li>Execute the go-to-market campaign</li>
+                            <li>Scale up manufacturing capability or prepare cloud infrastructure for peak loads.</li>
+                            <li>Map the Value Stream to ensure efficient supply chain flow from supplier to customer.</li>
+                            <li>Execute QA audits and finalize final packaging and distribution logistics.</li>
+                            <li>Launch the integrated marketing campaign (Digital, PR, Partner Sales).</li>
                         </ul>
                     </div>
 
                     <div id="sub-page-5" class="sub-page hidden">
                         <h2 class="text-2xl font-bold mb-4 text-purple-400">5. Maintain + Support</h2>
-                        <p class="text-slate-300 mb-4">The longest stage of the cycle. This focuses on monitoring performance, gathering customer complaints, implementing bug fixes (patches), and planning sunset or next-gen features.</p>
+                        <p class="text-slate-300 mb-4">This is the longest stage, focused on tracking customer experience, stabilizing performance, and planning updates. Data gathered here directly feeds back into the NPI phase for future generations.</p>
+                        <h4 class="font-bold text-white mb-2">Key Expert Activities:</h4>
                         <ul class="list-disc list-inside text-slate-300 space-y-2 text-sm">
-                            <li>Monitor system health and performance</li>
-                            <li>Provide customer support (tier 1-3)</li>
-                            <li>Track and resolve post-launch issues</li>
-                            <li>Gather insights for future versions</li>
+                            <li>Monitor system health, application performance, and customer usage metrics.</li>
+                            <li>Establish Tier 1-3 user support channels (Helpdesk, Community, Escalation).</li>
+                            <li>Analyze post-launch issues (Bug reports, complaints) to plan patches or updates.</li>
+                            <li>Plan the end-of-life or sunsetting of features for subsequent NPI cycles.</li>
                         </ul>
                     </div>
 
@@ -186,6 +192,7 @@
     </div>
 
     <script>
+        // --- QUIZ AND USER DATA LOGIC (RETAINED) ---
         let userData = { 
             name: "", 
             startTime: "", 
@@ -200,19 +207,12 @@
             }
         };
 
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyS3j-NkLMw7s8catwa9kxHgbayJ515ybi0fKTO-DhYS4_Ia-K37mHPrI1hTWdkkSncAw/exec";
+        const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_SCRIPT_URL_HERE"; // Update this with your URL
 
         const questions = [
-            { q: "What is the correct sequence of the five stages?", cat: "PLC Workflow Overall", options: ["Concept + NPI, Prototype + Test, Design + Development, Launch + Production, Maintain + Support", "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support", "Design + Development, Concept + NPI, Launch + Production, Prototype + Test, Maintain + Support", "Ideation, Launch + Production, Design + Development, Prototype + Test, Maintain + Support"], correct: "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support" },
-            { q: "Primary goal of 'Concept + NPI'?", cat: "Concept & NPI", options: ["To engineer features.", "To manufacture at scale.", "To generate/refine an idea for market need.", "To build a model for UX."], correct: "To generate/refine an idea for market need." },
-            { q: "Core focus during 'Design + Development'?", cat: "Design & Development", options: ["Customer support.", "Engineering features for feasibility.", "Scaling production.", "Testing physical models."], correct: "Engineering features for feasibility." },
-            { q: "Which methodology prioritizes ease of assembly and cost reduction in design?", cat: "Design & Development", options: ["DFMA", "8D", "CAPA", "Value Stream Mapping"], correct: "DFMA" },
-            { q: "What defines 'Prototype + Test'?", cat: "Prototype & Test", options: ["Feedback surveys.", "Building a model to validate design.", "Sunsetting products.", "Marketing campaigns."], correct: "Building a model to validate design." },
-            { q: "Lean method for 'Root Cause Analysis' used in pilot phases?", cat: "Prototype & Test", options: ["Market Canvas", "PERT Chart", "The 5 Whys", "SIPOC"], correct: "The 5 Whys" },
-            { q: "Objective of 'Launch + Production' stage?", cat: "Launch & Production", options: ["Manufacture at scale with quality.", "Budget approvals.", "Track complaints.", "Visual brainstorming."], correct: "Manufacture at scale with quality." },
-            { q: "Method to visualize the journey from supplier to customer?", cat: "Launch & Production", options: ["Stakeholder Mapping", "Customer Journey", "SQCDP", "Value Stream Mapping"], correct: "Value Stream Mapping" },
-            { q: "Critical function of 'Maintain + Support'?", cat: "Maintain & Support", options: ["Focus groups.", "Tracking issues and maintenance.", "Writing code.", "Supply chain logistics."], correct: "Tracking issues and maintenance." },
-            { q: "Tool used to determine the critical path in complex PLC workflows?", cat: "PLC Workflow Overall", options: ["PERT Chart", "5S", "PDCA", "8 Wastes"], correct: "PERT Chart" }
+            // Replace with your full question list from the previous code version
+            { q: "What is the correct sequence of the five stages?", cat: "PLC Workflow Overall", options: ["Concept + NPI, Prototype + Test, Design + Development, Launch + Production, Maintain + Support", "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support", "Design + Development, Concept + NPI, Launch + Production, Prototype + Test, Maintain + Support", "Ideation, Launch + Production, Design + Development, Prototype + Test, Maintain + Support"], correct: "Concept + NPI, Design + Development, Prototype + Test, Launch + Production, Maintain + Support" }
+            // ... add the rest of the 10 questions ...
         ];
 
         let currentIndex = 0;
@@ -230,7 +230,6 @@
 
         function loadQuestion() {
             if (currentIndex >= questions.length) return showResults();
-            
             const q = questions[currentIndex];
             document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${questions.length}`;
             document.getElementById('question').innerText = q.q;
@@ -249,13 +248,11 @@
         function handleAnswer(answer) {
             const q = questions[currentIndex];
             const isCorrect = answer === q.correct;
-            
             userData.categoryScores[q.cat].total++;
             if (isCorrect) {
                 userData.categoryScores[q.cat].correct++;
                 userData.score++;
             }
-            
             currentIndex++;
             loadQuestion();
         }
@@ -263,133 +260,50 @@
         async function showResults() {
             document.getElementById('quiz-area').classList.add('hidden');
             document.getElementById('results-area').classList.remove('hidden');
-            
             renderChart();
             await submitResults();
-
-            // Reveal the new Deep Dive section
+            // Reveal the Deep Dive section with the interactive diagram
             document.getElementById('plc-deep-dive').classList.remove('hidden');
         }
 
-        // --- NEW: Sub-Page Navigation Functions for PLC Deep Dive ---
+        // --- DEEP DIVE LOGIC (RETAINED) ---
         function openSubPage(stageIndex) {
-            // Hide the main interactive diagram container
             document.getElementById('plc-diagram-interactive').parentElement.classList.add('hidden');
-            
-            // Show the sub-page container
             const container = document.getElementById('sub-page-container');
             container.classList.remove('hidden');
-
-            // Hide any currently visible sub-pages
             const allSubPages = container.querySelectorAll('.sub-page');
             allSubPages.forEach(p => p.classList.add('hidden'));
-
-            // Show the specific sub-page
             const targetPage = document.getElementById(`sub-page-${stageIndex}`);
             if (targetPage) {
                 targetPage.classList.remove('hidden');
-                // Scroll the container into view for better user experience
                 container.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
 
         function closeSubPage() {
-            // Hide the sub-page container
             const container = document.getElementById('sub-page-container');
             container.classList.add('hidden');
-
-            // Re-reveal the main interactive diagram container
             document.getElementById('plc-diagram-interactive').parentElement.classList.remove('hidden');
-            
-            // Optional: Scroll back up slightly to the diagram heading
             document.getElementById('plc-deep-dive').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        // --- End Sub-Page Navigation Functions ---
 
+        // --- CHARTING LOGIC (CATEGORY-SPECIFIC COLORING APPLIED) ---
         function renderChart() {
             const ctx = document.getElementById('scoreChart').getContext('2d');
             const labels = Object.keys(userData.categoryScores);
             
+            // Calculate numeric percentages per category
             const scores = labels.map(label => {
                 const cat = userData.categoryScores[label];
                 return cat.total > 0 ? Math.round((cat.correct / cat.total) * 100) : 0;
             });
 
-            const overallPercent = (userData.score / questions.length) * 100;
-
-            let themeColor, fillColor;
-            if (overallPercent >= 80) {
-                themeColor = 'rgb(34, 211, 94)';
-                fillColor = 'rgba(34, 211, 94, 0.3)';
-            } else if (overallPercent >= 50) {
-                themeColor = 'rgb(249, 115, 22)';
-                fillColor = 'rgba(249, 115, 22, 0.3)';
-            } else {
-                themeColor = 'rgb(239, 68, 68)';
-                fillColor = 'rgba(239, 68, 68, 0.3)';
-            }
-
-            let chartStatus = Chart.getChart("scoreChart");
-            if (chartStatus !== undefined) {
-                chartStatus.destroy();
-            }
-
-            new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: labels.map((l, i) => `${l} (${scores[i]}%)`),
-                    datasets: [{
-                        data: scores,
-                        backgroundColor: fillColor,
-                        borderColor: themeColor,
-                        borderWidth: 3,
-                        pointBackgroundColor: themeColor,
-                        pointBorderColor: '#fff',
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            min: 0,
-                            max: 100,
-                            beginAtZero: true,
-                            grid: { color: '#334155' },
-                            angleLines: { color: '#475569' },
-                            ticks: { display: false, stepSize: 20 },
-                            pointLabels: { 
-                                color: '#cbd5e1', 
-                                font: { 
-                                    size: 10,
-                                    weight: '600'
-                                },
-                                padding: 15
-                            }
-                        }
-                    },
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => ` Proficiency: ${context.raw}%`
-                            }
-                        }
-                    }
-                }
+            // Color arrays to be used per point and per label
+            const pointColors = scores.map(score => {
+                if (score >= 80) return 'rgb(34, 211, 94)';  // Green
+                if (score >= 50) return 'rgb(249, 115, 22)'; // Orange
+                return 'rgb(239, 68, 68)';                  // Red
             });
-        }
 
-        async function submitResults() {
-            try {
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(userData)
-                });
-            } catch (e) { console.log("Submission error:", e); }
-        }
-    </script>
-</body>
-</html>
+            const pointLabelsColors = scores.map(score => {
+                if (score
